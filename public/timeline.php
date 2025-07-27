@@ -1,15 +1,15 @@
 <?php
-
+require_once __DIR__ . '/../includes/error_handler.php';
 require_once __DIR__ . '/../includes/config.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: signin.php');
+    header('Location: signin');
     exit();
 }
 
 $current_user_id = $_SESSION['user_id'];
-$current_username = $_SESSION['username']; // これはログイン時のユーザー名
-$current_display_name = $_SESSION['display_name'] ?? $current_username; // display_nameを優先、なければusername
+$current_username = $_SESSION['username'];
+$current_display_name = $_SESSION['display_name'] ?? $current_username;
 $post_error = '';
 
 // 投稿処理
@@ -24,13 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['post_content'])) {
             $stmt->bindParam(':user_id', $current_user_id);
             $stmt->bindParam(':content', $content);
             if ($stmt->execute()) {
-                header('Location: timeline.php');
+                header('Location: timeline');
                 exit();
             } else {
                 $post_error = '投稿に失敗しました。';
             }
         } catch (PDOException $e) {
-            error_log("Post creation error: " . $e->getMessage());
             $post_error = '投稿処理中にエラーが発生しました。';
         }
     }
@@ -47,7 +46,7 @@ try {
             p.image_url, 
             p.created_at, 
             u.username, 
-            u.display_name, -- display_nameも取得
+            u.display_name,
             u.user_id 
         FROM 
             posts p
@@ -58,7 +57,7 @@ try {
     ");
     $posts = $stmt->fetchAll();
 } catch (PDOException $e) {
-    error_log("Timeline fetch error: " . $e->getMessage());
+    // 例外はカスタム例外ハンドラで処理される
 }
 ?>
 <!DOCTYPE html>
@@ -75,9 +74,8 @@ try {
             <h1>MySNS</h1>
             <nav>
                 <ul>
-                    <li><a href="profile.php?user_id=<?php echo htmlspecialchars($current_user_id); ?>">プロフィール (<?php echo htmlspecialchars($current_display_name); ?>)</a></li>
-                    <li><a href="logout.php">ログアウト</a></li>
-                </ul>
+                    <li><a href="profile?user_id=<?php echo htmlspecialchars($current_user_id); ?>">プロフィール (<?php echo htmlspecialchars($current_display_name); ?>)</a></li>
+                    <li><a href="logout">ログアウト</a></li> </ul>
             </nav>
         </div>
     </header>
@@ -85,8 +83,7 @@ try {
     <div class="container">
         <section class="post-form">
             <h2>新しい投稿</h2>
-            <form action="timeline.php" method="post">
-                <div class="form-group">
+            <form action="timeline" method="post"> <div class="form-group">
                     <textarea name="post_content" placeholder="今どうしてる？" rows="4" required></textarea>
                 </div>
                 <?php if ($post_error): ?>
@@ -104,7 +101,7 @@ try {
                 <?php foreach ($posts as $post): ?>
                     <div class="post">
                         <p class="post-meta">
-                            <a href="profile.php?user_id=<?php echo htmlspecialchars($post['user_id']); ?>">
+                            <a href="profile?user_id=<?php echo htmlspecialchars($post['user_id']); ?>">
                                 **<?php echo htmlspecialchars($post['display_name']); ?>** @<?php echo htmlspecialchars($post['username']); ?> </a>
                             - <?php echo htmlspecialchars(date('Y/m/d H:i', strtotime($post['created_at']))); ?>
                         </p>
@@ -113,7 +110,7 @@ try {
                             <img src="<?php echo htmlspecialchars($post['image_url']); ?>" alt="投稿画像" class="post-image">
                         <?php endif; ?>
                         <div class="post-actions">
-                            <a href="post_detail.php?post_id=<?php echo htmlspecialchars($post['post_id']); ?>">詳細・コメント</a>
+                            <a href="post_detail?post_id=<?php echo htmlspecialchars($post['post_id']); ?>">詳細・コメント</a>
                         </div>
                     </div>
                 <?php endforeach; ?>

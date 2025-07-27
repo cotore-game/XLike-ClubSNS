@@ -1,5 +1,5 @@
 <?php
-
+require_once __DIR__ . '/../includes/error_handler.php';
 require_once __DIR__ . '/../includes/config.php';
 
 // セッション変数を全て削除
@@ -21,5 +21,5 @@ session_destroy();
 unset($_SESSION['common_password_passed']);
 
 // ログインページまたは共通パスワードページへリダイレクト
-header('Location: index.php');
+header('Location: index');
 exit();

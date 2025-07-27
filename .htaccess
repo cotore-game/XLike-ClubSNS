@@ -1,8 +1,30 @@
-# ディレクトリ一覧表示を防ぐ
+# ディレクトリの内容を一覧表示させない
 Options -Indexes
 
-# RewriteEngineを有効にする
+# URL書き換え機能を有効にする
 RewriteEngine On
 
-# includes ディレクトリへの直接アクセスを禁止
+# includes ディレクトリへの直接アクセスを禁止する
 RewriteRule ^includes/ - [F,L]
+
+
+# .php 拡張子をURLから隠すルール
+
+# リクエストされたものがファイルでもディレクトリでもない場合
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+# かつ、リクエストされたものに.phpを付けるとファイルが存在する場合
+RewriteCond %{REQUEST_FILENAME}.php -f
+# 実際に存在する.phpファイルに内部的に書き換える
+RewriteRule ^(.*)$ $1.php [L]
+
+
+# public/ ディレクトリにすべてのアクセスを振り分けるルール
+
+# public/ へのアクセスを既に意図していない場合のみ
+RewriteCond %{REQUEST_URI} !^/public/
+# リクエストされたものがファイルでもディレクトリでもない場合
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+# public/ の中にあるファイルに内部的に書き換える
+RewriteRule ^(.*)$ public/$1 [L]

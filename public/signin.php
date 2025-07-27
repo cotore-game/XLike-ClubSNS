@@ -1,14 +1,14 @@
 <?php
-
+require_once __DIR__ . '/../includes/error_handler.php';
 require_once __DIR__ . '/../includes/config.php';
 
 if (!isset($_SESSION['common_password_passed']) || $_SESSION['common_password_passed'] !== true) {
-    header('Location: index.php');
+    header('Location: index');
     exit();
 }
 
 if (isset($_SESSION['user_id'])) {
-    header('Location: timeline.php');
+    header('Location: timeline');
     exit();
 }
 
@@ -37,14 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // ログイン成功
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['username'] = $user['username'];
-                $_SESSION['display_name'] = $user['display_name']; // display_nameもセッションに保存すると便利
-                header('Location: timeline.php');
+                $_SESSION['display_name'] = $user['display_name'];
+                header('Location: timeline');
                 exit();
             } else {
                 $error_message = 'ユーザー名またはパスワードが間違っています。';
             }
         } catch (PDOException $e) {
-            error_log("Login error: " . $e->getMessage());
+            // 例外はカスタム例外ハンドラで処理される
             $error_message = 'ログイン処理中にエラーが発生しました。';
         }
     }
@@ -67,9 +67,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($error_message): ?>
             <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
         <?php endif; ?>
-        <form action="signin.php" method="post">
-            <div class="form-group">
-                <label for="username">ユーザー名:</label> <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" required>
+        <form action="signin" method="post"> <div class="form-group">
+                <label for="username">ユーザー名:</label>
+                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" required>
             </div>
             <div class="form-group">
                 <label for="password">パスワード:</label>
@@ -77,7 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <button type="submit">ログイン</button>
         </form>
-        <p>アカウントをお持ちでないですか？ <a href="signup.php">新規登録はこちら</a></p>
-    </div>
+        <p>アカウントをお持ちでないですか？ <a href="signup">新規登録はこちら</a></p> </div>
 </body>
 </html>

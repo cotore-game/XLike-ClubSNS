@@ -1,9 +1,9 @@
 <?php
-
+require_once __DIR__ . '/../includes/error_handler.php';
 require_once __DIR__ . '/../includes/config.php';
 
 if (!isset($_SESSION['common_password_passed']) || $_SESSION['common_password_passed'] !== true) {
-    header('Location: index.php');
+    header('Location: index');
     exit();
 }
 
@@ -19,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 入力値のバリデーション
     if (empty($username)) { $errors[] = 'ユーザー名を入力してください。'; }
-    // usernameは一意である必要があるので、ここでチェック
     if (empty($display_name)) { $errors[] = 'ディスプレイ名を入力してください。'; }
     if (empty($password)) { $errors[] = 'パスワードを入力してください。'; }
     elseif (strlen($password) < 6) { $errors[] = 'パスワードは6文字以上で入力してください。'; }
@@ -32,11 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bindParam(':username', $username);
             $stmt->execute();
             if ($stmt->fetchColumn() > 0) {
-                $errors[] = 'このユーザー名は既に使われています。';
+                $errors[] = 'このユーザー名は既に使われています。別のユーザー名をお試しください。'; // メッセージを明確化
             }
         } catch (PDOException $e) {
-            error_log("Username duplication check error: " . $e->getMessage());
-            $errors[] = '登録処理中にエラーが発生しました。';
+            $errors[] = 'ユーザー名の重複チェック中にエラーが発生しました。';
         }
     }
 
@@ -47,18 +45,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ユーザー情報をデータベースに挿入
             $stmt = $pdo->prepare("INSERT INTO users (username, display_name, password_hash) VALUES (:username, :display_name, :password_hash)");
             $stmt->bindParam(':username', $username);
-            $stmt->bindParam(':display_name', $display_name); // バインドパラメータ追加
+            $stmt->bindParam(':display_name', $display_name);
             $stmt->bindParam(':password_hash', $password_hash);
 
             if ($stmt->execute()) {
-                header('Location: signin.php?registered=true');
+                header('Location: signin?registered=true');
                 exit();
             } else {
                 $errors[] = 'ユーザー登録に失敗しました。';
             }
         } catch (PDOException $e) {
-            error_log("User registration error: " . $e->getMessage());
-            $errors[] = '登録処理中にエラーが発生しました。';
+            $errors[] = 'ユーザー登録処理中にエラーが発生しました。';
         }
     }
 }
@@ -83,13 +80,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </ul>
             </div>
         <?php endif; ?>
-        <form action="signup.php" method="post">
-            <div class="form-group">
+        <form action="signup" method="post"> <div class="form-group">
                 <label for="username">ユーザー名:</label>
                 <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($username); ?>" required>
             </div>
             <div class="form-group">
-                <label for="display_name">ディスプレイ名:</label> <input type="text" id="display_name" name="display_name" value="<?php echo htmlspecialchars($display_name); ?>" required>
+                <label for="display_name">ディスプレイ名:</label>
+                <input type="text" id="display_name" name="display_name" value="<?php echo htmlspecialchars($display_name); ?>" required>
             </div>
             <div class="form-group">
                 <label for="password">パスワード:</label>
@@ -101,7 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <button type="submit">登録</button>
         </form>
-        <p>既にアカウントをお持ちですか？ <a href="signin.php">ログインはこちら</a></p>
-    </div>
+        <p>既にアカウントをお持ちですか？ <a href="signin">ログインはこちら</a></p> </div>
 </body>
 </html>

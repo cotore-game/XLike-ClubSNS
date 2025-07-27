@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../includes/error_handler.php'; // エラーハンドラを最初に読み込む
 require_once __DIR__ . '/../includes/config.php';
 
 $common_pass_error = '';
@@ -7,10 +8,10 @@ $common_pass_error = '';
 if (isset($_SESSION['common_password_passed']) && $_SESSION['common_password_passed'] === true) {
     if (isset($_SESSION['user_id'])) {
         // ログイン済みならタイムラインへ
-        header('Location: timeline.php');
+        header('Location: timeline'); // .php拡張子を非表示にするため変更
     } else {
         // 未ログインならログインページへ
-        header('Location: signin.php');
+        header('Location: signin'); // .php拡張子を非表示にするため変更
     }
     exit();
 }
@@ -28,13 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['common_password'])) {
         // パスワードを検証
         if ($setting && password_verify($input_common_password, $setting['setting_value'])) {
             $_SESSION['common_password_passed'] = true; // セッションに認証情報を保存
-            header('Location: signin.php'); // ログイン/サインアップページへリダイレクト
+            header('Location: signin'); // .php拡張子を非表示にするため変更
             exit();
         } else {
             $common_pass_error = '共通パスワードが間違っています。';
         }
     } catch (PDOException $e) {
-        error_log("Common password authentication error: " . $e->getMessage());
+        // PDOExceptionはカスタム例外ハンドラで処理される
         $common_pass_error = '認証処理中にエラーが発生しました。';
     }
 }
