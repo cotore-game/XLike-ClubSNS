@@ -8,6 +8,11 @@ RewriteEngine On
 RewriteRule ^includes/ - [F,L]
 
 
+# プロフィールURLのリライトルール
+# /users/USERNAME を public/profile.php?username=USERNAME に内部的に書き換える
+RewriteRule ^users/([^/]+)$ profile.php?username=$1 [L,QSA]
+
+
 # .php 拡張子をURLから隠すルール
 
 # リクエストされたものがファイルでもディレクトリでもない場合

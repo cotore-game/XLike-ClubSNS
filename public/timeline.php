@@ -38,27 +38,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['post_content'])) {
 // タイムラインの投稿を取得
 $posts = [];
 try {
-    // 投稿者名とディスプレイ名も一緒に取得するためにusersテーブルとJOIN
-    $stmt = $pdo->query("
+    // postsテーブルとusersテーブルを結合して、投稿者のdisplay_nameとusernameも取得
+    $stmt = $pdo->prepare("
         SELECT 
             p.post_id, 
+            p.user_id, 
             p.content, 
             p.image_url, 
             p.created_at, 
             u.username, 
-            u.display_name,
-            u.user_id 
+            u.display_name 
         FROM 
-            posts p
+            posts p 
         JOIN 
-            users u ON p.user_id = u.user_id
+            users u ON p.user_id = u.user_id 
         ORDER BY 
             p.created_at DESC
     ");
-    $posts = $stmt->fetchAll();
+    $stmt->execute();
+    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    // 例外はカスタム例外ハンドラで処理される
+    // エラー処理（例: $post_error にメッセージを設定）
+    $post_error = 'タイムラインの読み込み中にエラーが発生しました。';
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -74,21 +77,24 @@ try {
             <h1>MySNS</h1>
             <nav>
                 <ul>
-                    <li><a href="profile?user_id=<?php echo htmlspecialchars($current_user_id); ?>">プロフィール (<?php echo htmlspecialchars($current_display_name); ?>)</a></li>
-                    <li><a href="logout">ログアウト</a></li> </ul>
+                    <li><a href="timeline">タイムライン</a></li>
+                    <li><a href="users/<?php echo htmlspecialchars($current_username); ?>">プロフィール (<?php echo htmlspecialchars($current_display_name); ?>)</a></li>
+                    <li><a href="logout">ログアウト</a></li>
+                </ul>
             </nav>
         </div>
     </header>
 
     <div class="container">
-        <section class="post-form">
-            <h2>新しい投稿</h2>
-            <form action="timeline" method="post"> <div class="form-group">
-                    <textarea name="post_content" placeholder="今どうしてる？" rows="4" required></textarea>
+        <section class="post-form-section">
+            <h2>新規投稿</h2>
+            <?php if ($post_error): ?>
+                <p class="error-message"><?php echo htmlspecialchars($post_error); ?></p>
+            <?php endif; ?>
+            <form action="timeline" method="post">
+                <div class="form-group">
+                    <textarea name="post_content" placeholder="今、何してる？" rows="4" required></textarea>
                 </div>
-                <?php if ($post_error): ?>
-                    <p class="error-message"><?php echo htmlspecialchars($post_error); ?></p>
-                <?php endif; ?>
                 <button type="submit">投稿</button>
             </form>
         </section>
@@ -101,8 +107,9 @@ try {
                 <?php foreach ($posts as $post): ?>
                     <div class="post">
                         <p class="post-meta">
-                            <a href="profile?user_id=<?php echo htmlspecialchars($post['user_id']); ?>">
-                                **<?php echo htmlspecialchars($post['display_name']); ?>** @<?php echo htmlspecialchars($post['username']); ?> </a>
+                            <a href="users/<?php echo htmlspecialchars($post['username']); ?>">
+                                **<?php echo htmlspecialchars($post['display_name']); ?>** @<?php echo htmlspecialchars($post['username']); ?> 
+                            </a>
                             - <?php echo htmlspecialchars(date('Y/m/d H:i', strtotime($post['created_at']))); ?>
                         </p>
                         <p class="post-content"><?php echo nl2br(htmlspecialchars($post['content'])); ?></p>
