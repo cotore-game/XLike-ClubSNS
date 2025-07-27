@@ -74,7 +74,7 @@ try {
 <body>
     <header>
         <div class="container">
-            <h1>MySNS</h1>
+            <h1><a href="timeline">MySNS</a></h1>
             <nav>
                 <ul>
                     <li><a href="timeline">タイムライン</a></li>
@@ -95,7 +95,7 @@ try {
                 <div class="form-group">
                     <textarea name="post_content" placeholder="今、何してる？" rows="4" required></textarea>
                 </div>
-                <button type="submit">投稿</button>
+                <button type="submit" class="button">投稿</button>
             </form>
         </section>
 
@@ -108,7 +108,7 @@ try {
                     <div class="post">
                         <p class="post-meta">
                             <a href="users/<?php echo htmlspecialchars($post['username']); ?>">
-                                **<?php echo htmlspecialchars($post['display_name']); ?>** @<?php echo htmlspecialchars($post['username']); ?> 
+                                <strong><?php echo htmlspecialchars($post['display_name']); ?></strong> @<?php echo htmlspecialchars($post['username']); ?> 
                             </a>
                             - <?php echo htmlspecialchars(date('Y/m/d H:i', strtotime($post['created_at']))); ?>
                         </p>

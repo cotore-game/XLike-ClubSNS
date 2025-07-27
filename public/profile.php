@@ -9,6 +9,9 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $current_user_id = $_SESSION['user_id'];
+$current_username = $_SESSION['username']; // セッションから現在のユーザー名を取得
+$current_display_name = $_SESSION['display_name'] ?? $current_username; // セッションから現在の表示名を取得
+
 $view_username = null; // ユーザー名で取得するように変更
 $user_profile = null;
 $user_posts = [];
@@ -19,7 +22,7 @@ if (isset($_GET['username'])) {
     $view_username = $_GET['username'];
 } else {
     // ユーザー名が指定されていない場合は、ログインユーザー自身のプロフィールを表示
-    $view_username = $_SESSION['username']; // セッションから現在のユーザー名を取得
+    $view_username = $current_username; // セッションから現在のユーザー名を取得
 }
 
 try {
@@ -71,11 +74,11 @@ try {
 <body>
     <header>
         <div class="container">
-            <h1>MySNS</h1>
+            <h1><a href="timeline">MySNS</a></h1>
             <nav>
                 <ul>
                     <li><a href="timeline">タイムライン</a></li>
-                    <li><a href="users/<?php echo htmlspecialchars($_SESSION['username']); ?>">プロフィール (<?php echo htmlspecialchars($_SESSION['display_name'] ?? $_SESSION['username']); ?>)</a></li>
+                    <li><a href="users/<?php echo htmlspecialchars($current_username); ?>">プロフィール (<?php echo htmlspecialchars($current_display_name); ?>)</a></li>
                     <li><a href="logout">ログアウト</a></li>
                 </ul>
             </nav>
@@ -119,7 +122,7 @@ try {
                     <?php foreach ($user_posts as $post): ?>
                         <div class="post">
                             <p class="post-meta">
-                                <a href="users/<?php echo htmlspecialchars($user_profile['username']); ?>"> **<?php echo htmlspecialchars($user_profile['display_name']); ?>** @<?php echo htmlspecialchars($user_profile['username']); ?> 
+                                <a href="users/<?php echo htmlspecialchars($user_profile['username']); ?>"> <strong><?php echo htmlspecialchars($user_profile['display_name']); ?></strong> @<?php echo htmlspecialchars($user_profile['username']); ?> 
                                 </a>
                                 - <?php echo htmlspecialchars(date('Y/m/d H:i', strtotime($post['created_at']))); ?>
                             </p>
