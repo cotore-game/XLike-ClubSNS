@@ -4,28 +4,25 @@ Options -Indexes
 # URL書き換え機能を有効にする
 RewriteEngine On
 
+# 物理的に存在するファイルやディレクトリへのリクエストは、リライトせずに直接処理する
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
 # includes ディレクトリへの直接アクセスを禁止する
 RewriteRule ^includes/ - [F,L]
 
 # プロフィールURLのリライトルール
-# /users/USERNAME を public/profile.php?username=USERNAME に内部的に書き換える
-RewriteRule ^users/([^/]+)$ profile.php?username=$1 [L,QSA]
+# users/USERNAME を public/profile.php?username=USERNAME に内部的に書き換える
+RewriteRule ^users/([^/]+)$ public/profile.php?username=$1 [L,QSA]
 
 # .php 拡張子をURLから隠すルール
+# リクエストされたものが物理ファイルでもディレクトリでもない場合
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^(.*)$ $1.php [L]
+# かつ、リクエストされたパスに.phpを付けたファイルが public/ ディレクトリ内に存在する場合
+RewriteCond %{DOCUMENT_ROOT}/public/$1.php -f
+# public/ の中にある対応する.phpファイルに内部的に書き換える
+RewriteRule ^(.*)$ public/$1.php [L]
 
-# 静的ファイルへのリクエストはリライトしない
-RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|svg|ico)$ [NC]
-RewriteRule .* - [L] # 何もせず、処理を終了する
-
-# public/ ディレクトリにすべてのアクセスを振り分けるルール
-# public/ へのアクセスを既に意図していない場合のみ
-RewriteCond %{REQUEST_URI} !^/public/
-# リクエストされたものがファイルでもディレクトリでもない場合
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-# public/ の中にあるファイルに内部的に書き換える
 RewriteRule ^(.*)$ public/$1 [L]

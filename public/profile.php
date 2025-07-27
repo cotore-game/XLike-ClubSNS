@@ -1,45 +1,50 @@
 <?php
+// このファイルは、指定されたユーザーのプロフィール情報と、そのユーザーの投稿を表示します。
+
 require_once __DIR__ . '/../includes/error_handler.php';
 require_once __DIR__ . '/../includes/config.php';
 
-// ログインしていない場合はログインページへリダイレクト
+// ユーザーがログインしているか確認します。
+// ログインしていない場合は、ログインページにリダイレクトします。
 if (!isset($_SESSION['user_id'])) {
     header('Location: signin');
     exit();
 }
 
+// 現在のログインユーザーのID、ユーザー名、表示名を取得します。
 $current_user_id = $_SESSION['user_id'];
-$current_username = $_SESSION['username']; // セッションから現在のユーザー名を取得
-$current_display_name = $_SESSION['display_name'] ?? $current_username; // セッションから現在の表示名を取得
+$current_username = $_SESSION['username'];
+$current_display_name = $_SESSION['display_name'] ?? $current_username;
 
-$view_username = null; // ユーザー名で取得するように変更
-$user_profile = null;
-$user_posts = [];
-$error_message = '';
+$view_username = null; // URLから取得、またはログインユーザーのユーザー名
+$user_profile = null;  // 取得したユーザープロフィールデータ
+$user_posts = [];      // 取得したユーザーの投稿データ
+$error_message = '';   // エラーメッセージを格納する変数
 
-// 表示するユーザーのユーザー名を取得
+// URLのGETパラメータから表示対象のユーザー名を取得します。
+// ユーザー名が指定されていない場合は、ログインしている自分自身のプロフィールを表示します。
 if (isset($_GET['username'])) {
     $view_username = $_GET['username'];
 } else {
-    // ユーザー名が指定されていない場合は、ログインユーザー自身のプロフィールを表示
-    $view_username = $current_username; // セッションから現在のユーザー名を取得
+    $view_username = $current_username;
 }
 
 try {
-    // ユーザープロフィール情報の取得 (user_idではなくusernameで検索)
+    // データベースからユーザープロフィール情報を取得します。ユーザー名で検索します。
     $stmt = $pdo->prepare("SELECT user_id, username, display_name, profile_text, profile_image_url, created_at FROM users WHERE username = :username");
-    $stmt->bindParam(':username', $view_username, PDO::PARAM_STR); // PDO::PARAM_STR を使用
+    $stmt->bindParam(':username', $view_username, PDO::PARAM_STR);
     $stmt->execute();
-    $user_profile = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user_profile = $stmt->fetch(PDO::FETCH_ASSOC); // 結果を連想配列として取得
 
     if (!$user_profile) {
-        // ユーザーが見つからない場合
+        // 指定されたユーザーが見つからなかった場合
         $error_message = '指定されたユーザーは見つかりませんでした。';
     } else {
-        // 表示対象ユーザーのuser_idを確定
-        $view_user_id = $user_profile['user_id']; // プロフィール情報からuser_idを取得
+        // プロフィールが見つかった場合、そのユーザーのIDを確定
+        $view_user_id = $user_profile['user_id'];
 
-        // そのユーザーの投稿を取得 (user_idは上記で取得したものを使用)
+        // そのユーザーの投稿をデータベースから取得します。
+        // 最新の投稿が上に来るように、作成日時で降順にソートします。
         $stmt_posts = $pdo->prepare("
             SELECT 
                 post_id, 
@@ -55,40 +60,22 @@ try {
         ");
         $stmt_posts->bindParam(':user_id', $view_user_id, PDO::PARAM_INT);
         $stmt_posts->execute();
-        $user_posts = $stmt_posts->fetchAll(PDO::FETCH_ASSOC);
+        $user_posts = $stmt_posts->fetchAll(PDO::FETCH_ASSOC); // 結果を連想配列として取得
     }
 
 } catch (PDOException $e) {
+    // データベース操作中にエラーが発生した場合
     $error_message = 'プロフィール情報の取得中にエラーが発生しました。';
-    // エラー詳細をログに記録したい場合は $e->getMessage() を利用
 }
-?>
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($user_profile['display_name'] ?? 'ユーザー'); ?>さんのプロフィール - MySNS</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1><a href="timeline">MySNS</a></h1>
-            <nav>
-                <ul>
-                    <li><a href="timeline">タイムライン</a></li>
-                    <li><a href="users/<?php echo htmlspecialchars($current_username); ?>">プロフィール (<?php echo htmlspecialchars($current_display_name); ?>)</a></li>
-                    <li><a href="logout">ログアウト</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
 
-    <div class="container">
-        <?php if ($error_message): ?>
+// ページ固有のタイトルを設定し、共通ヘッダーに渡します。
+$page_title = htmlspecialchars($user_profile['display_name'] ?? 'ユーザー') . 'さんのプロフィール - MySNS';
+require_once __DIR__ . '/../includes/header.php'; // 共通ヘッダーを読み込み
+?>
+
+    <div class="container"> <?php if ($error_message): // エラーメッセージがある場合に表示 ?>
             <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
-        <?php elseif ($user_profile): ?>
+        <?php elseif ($user_profile): // プロフィール情報が正常に取得できた場合に表示 ?>
             <section class="user-profile-section">
                 <div class="profile-header">
                     <img src="<?php echo htmlspecialchars($user_profile['profile_image_url'] ?? 'assets/default_profile.png'); ?>" alt="プロフィール画像" class="profile-image">
@@ -97,13 +84,13 @@ try {
                     <p class="joined-date">参加日: <?php echo htmlspecialchars(date('Y年m月d日', strtotime($user_profile['created_at']))); ?></p>
                 </div>
                 <div class="profile-body">
-                    <?php if ($user_profile['profile_text']): ?>
+                    <?php if ($user_profile['profile_text']): // プロフィール本文がある場合に表示 ?>
                         <p class="profile-text"><?php echo nl2br(htmlspecialchars($user_profile['profile_text'])); ?></p>
                     <?php else: ?>
                         <p class="profile-text">プロフィールが設定されていません。</p>
                     <?php endif; ?>
 
-                    <?php if ($user_profile['user_id'] === $current_user_id): // 表示中のユーザーがログインユーザー自身か確認 ?>
+                    <?php if ($user_profile['user_id'] === $current_user_id): // 表示中のユーザーがログインユーザー自身の場合 ?>
                         <div class="profile-actions">
                             <a href="edit_profile" class="button">プロフィールを編集</a>
                         </div>
@@ -116,18 +103,19 @@ try {
 
             <section class="user-posts-section">
                 <h3><?php echo htmlspecialchars($user_profile['display_name']); ?>さんの投稿</h3>
-                <?php if (empty($user_posts)): ?>
+                <?php if (empty($user_posts)): // 投稿がまだ存在しない場合 ?>
                     <p>まだ投稿がありません。</p>
-                <?php else: ?>
+                <?php else: // 投稿がある場合、それぞれの投稿を表示 ?>
                     <?php foreach ($user_posts as $post): ?>
                         <div class="post">
                             <p class="post-meta">
-                                <a href="users/<?php echo htmlspecialchars($user_profile['username']); ?>"> <strong><?php echo htmlspecialchars($user_profile['display_name']); ?></strong> @<?php echo htmlspecialchars($user_profile['username']); ?> 
+                                <a href="users/<?php echo htmlspecialchars($user_profile['username']); ?>">
+                                    <strong><?php echo htmlspecialchars($user_profile['display_name']); ?></strong> @<?php echo htmlspecialchars($user_profile['username']); ?> 
                                 </a>
                                 - <?php echo htmlspecialchars(date('Y/m/d H:i', strtotime($post['created_at']))); ?>
                             </p>
                             <p class="post-content"><?php echo nl2br(htmlspecialchars($post['content'])); ?></p>
-                            <?php if ($post['image_url']): ?>
+                            <?php if ($post['image_url']): // 投稿に画像がある場合に表示 ?>
                                 <img src="<?php echo htmlspecialchars($post['image_url']); ?>" alt="投稿画像" class="post-image">
                             <?php endif; ?>
                             <div class="post-actions">
@@ -138,12 +126,5 @@ try {
                 <?php endif; ?>
             </section>
         <?php endif; ?>
-    </div>
-
-    <footer>
-        <div class="container">
-            <p>&copy; <?php echo date('Y'); ?> MySNS</p>
-        </div>
-    </footer>
-</body>
-</html>
+    </div> <?php require_once __DIR__ . '/../includes/footer.php'; // 共通フッターを読み込み ?>
+    

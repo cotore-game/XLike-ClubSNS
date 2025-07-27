@@ -1,0 +1,93 @@
+:root {
+    --primary-blue: #1DA1F2; /* Twitter Blue */
+    --primary-blue-dark: #1A91DA;
+    --text-color-dark: #0F1419; /* Main text color */
+    --text-color-light: #536471; /* Secondary text color */
+    --background-light: #F7F9F9; /* Light background */
+    --border-light: #EFF3F4;
+    --card-background: #FFFFFF;
+    --error-red: #E0245E;
+    --success-green: #17BF63;
+    --focus-ring: #BBDDFB; /* For accessibility */
+}
+
+/* 全体設定 */
+*, *::before, *::after {
+    box-sizing: border-box; /* パディングとボーダーを幅に含める */
+}
+
+body {
+    font-family: 'Inter', 'Helvetica Neue', 'Arial', sans-serif; /* モダンなフォント */
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-light);
+    color: var(--text-color-dark);
+    line-height: 1.6; /* 行間を調整 */
+    -webkit-font-smoothing: antialiased; /* フォントのアンチエイリアス */
+    -moz-osx-font-smoothing: grayscale; /* フォントのアンチエイリアス */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+    color: var(--text-color-dark);
+}
+
+a {
+    color: var(--primary-blue);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+    color: var(--primary-blue-dark);
+    text-decoration: underline;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* 汎用的なセクションスタイル */
+section {
+    background-color: var(--card-background);
+    padding: 24px; /* パディングを増やす */
+    margin-bottom: 16px;
+    border-radius: 16px; /* より大きな角丸 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* 柔らかいシャドウ */
+}
+
+/* メッセージスタイル */
+.error-message, .success-message {
+    padding: 14px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    font-size: 0.95em;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.error-message {
+    color: var(--error-red);
+    background-color: #ffeef2;
+    border: 1px solid var(--error-red);
+}
+
+.success-message {
+    color: var(--success-green);
+    background-color: #e6ffed;
+    border: 1px solid var(--success-green);
+}
+
+/* ユーティリティクラス */
+.text-center { text-align: center; }
+.mt-4 { margin-top: 1rem; }
+.mb-4 { margin-bottom: 1rem; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
