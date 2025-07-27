@@ -1,0 +1,16 @@
+# IDE
+.vscode/
+.idea/
+*.iml
+*.DS_Store
+Thumbs.db
+
+# 環境設定
+/includes/config.php
+
+# ログファイル
+*.log
+
+# キャッシュ
+*.cache
+*.tmp

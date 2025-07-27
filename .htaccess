@@ -1,0 +1,8 @@
+# ディレクトリ一覧表示を防ぐ
+Options -Indexes
+
+# RewriteEngineを有効にする
+RewriteEngine On
+
+# includes ディレクトリへの直接アクセスを禁止
+RewriteRule ^includes/ - [F,L]
