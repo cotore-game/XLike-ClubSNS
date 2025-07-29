@@ -6,7 +6,8 @@
 Thumbs.db
 
 # 環境設定
-/includes/config.php
+clubsns/includes/config.php
+*.env
 
 # ログファイル
 *.log
