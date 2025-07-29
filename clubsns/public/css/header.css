@@ -1,0 +1,100 @@
+/* css/header.css */
+
+/* ヘッダー */
+header {
+    background-color: #ffffff; /* 白い背景 */
+    border-bottom: 1px solid #eff3f4; /* 控えめなボーダー */
+    padding: 10px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); /* 柔らかいシャドウ */
+    position: sticky; /* スクロールしてもヘッダーを固定 */
+    top: 0;
+    z-index: 1000; /* 他の要素より手前に表示 */
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between; /* ロゴとナビゲーションを左右に配置 */
+    align-items: center;
+    padding: 0 20px; /* .containerにもパディングを適用 */
+}
+
+/* headerlogo に対応するスタイリング (h1 a タグに相当) */
+.header-logo { /* h1 a タグにこのクラスを付与することを想定 */
+    margin: 0;
+    font-size: 26px; /* 少し大きく */
+    font-weight: 800; /* より太く */
+    text-decoration: none;
+    color: #1da1f2; /* Twitterブルー */
+    display: flex;
+    align-items: center;
+}
+
+/* headerlist に対応するスタイリング (nav ul タグに相当) */
+.header-list { /* nav ul タグにこのクラスを付与することを想定 */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex; /* リストアイテムを横並びに */
+}
+
+.header-list li {
+    margin-left: 25px; /* 各ナビゲーションリンク間の間隔 */
+}
+
+.header-list li a {
+    text-decoration: none;
+    color: #0f1419;
+    font-weight: 600; /* セミボールド */
+    transition: color 0.2s ease-in-out;
+    padding: 5px 0; /* クリックしやすいように */
+    position: relative;
+}
+
+.header-list li a:hover {
+    color: #1da1f2;
+}
+
+/* アクティブなリンクやホバー時に下線を表示 */
+.header-list li a.active::after,
+.header-list li a:hover::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #1da1f2;
+    border-radius: 2px;
+}
+
+/* スマホ対応の微調整 */
+@media (max-width: 768px) {
+    header .container {
+        flex-direction: column; /* スマホでは縦に並べる */
+        align-items: flex-start; /* 左寄せ */
+        padding: 10px 15px; /* スマホでのヘッダーパディング */
+    }
+
+    .header-logo {
+        width: 100%; /* ロゴを幅いっぱいに */
+        text-align: center; /* 中央寄せ */
+        margin-bottom: 10px; /* 下に少しスペース */
+    }
+
+    header nav { /* nav タグ自体に幅を適用 */
+        width: 100%;
+    }
+
+    .header-list {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: space-around; /* ナビ項目を均等配置 */
+    }
+
+    .header-list li {
+        margin-left: 0;
+        text-align: center;
+        flex-grow: 1; /* 各項目が利用可能なスペースを埋める */
+        padding: 5px 0; /* タッチしやすいように */
+    }
+}

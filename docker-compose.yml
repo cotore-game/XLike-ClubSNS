@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Apache Web Server with PHP-FPM integration
+  web:
+    build:
+      context: ./apache
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - ./clubsns:/var/www/html
+      - ./apache/conf.d:/etc/apache2/conf-enabled
+    depends_on:
+      - php
+    restart: always
+    networks:
+      - app-network
+
+  # PHP-FPM service
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    volumes:
+      - ./clubsns:/var/www/html
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+    restart: always
+    networks:
+      - app-network
+
+  # MySQL Database service
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    ports:
+      - "3306:3306"
+    restart: always
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge

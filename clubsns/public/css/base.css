@@ -1,0 +1,38 @@
+/* 全体設定 */
+body {
+    font-family: 'Inter', 'Helvetica Neue', 'Arial', sans-serif; /* モダンなフォントを追加 */
+    margin: 0;
+    padding: 0;
+    background-color: #f7f9f9; /* より明るい背景色 */
+    color: #0f1419; /* Twitterの主要テキスト色に近い */
+    line-height: 1.5; /* 行間の調整 */
+    -webkit-font-smoothing: antialiased; /* フォントのアンチエイリアス */
+    -moz-osx-font-smoothing: grayscale; /* フォントのアンチエイリアス */
+}
+
+.container {
+    max-width: 980px; /* 少し広げてコンテンツの表示領域を増やす */
+    margin: 0 auto;
+}
+
+/* リンク全般 */
+a {
+    color: #1da1f2;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* タイトルと見出し */
+h1, h2, h3, h4, h5, h6 {
+    color: #0f1419;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 24px;
+}
