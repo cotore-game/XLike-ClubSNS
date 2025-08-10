@@ -1,12 +1,14 @@
 # apache/Dockerfile
 FROM httpd:2.4
-# Apache 公式イメージを使用
 
-# PHP-FPM モジュールを有効にするために必要なモジュールをインストール
+# 必要なシステムライブラリをインストール
 RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libzip-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Apache の設定ファイルをコピー (PHP-FPM との連携設定)
-COPY conf.d/php.conf /etc/apache2/conf-enabled/php.conf
+# Apacheの設定ファイルをコピー
+COPY conf.d/php.conf /usr/local/apache2/conf/extra/httpd-php.conf
+
+# メイン設定ファイルに含める
+RUN echo "Include conf/extra/httpd-php.conf" >> /usr/local/apache2/conf/httpd.conf
